@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping
-public class HealehController { // 注意：类名拼写有误，应为"HealthController"
+public class HealthController {
 
     @GetMapping("/health")
     public BaseResponse<String> health() {

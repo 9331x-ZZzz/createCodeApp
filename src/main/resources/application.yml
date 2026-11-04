@@ -1,6 +1,6 @@
 spring:
   application:
-    name:creatCodeApp-backend
+    name: creatCodeApp-backend
 server:
   port: 8123
   servlet:
