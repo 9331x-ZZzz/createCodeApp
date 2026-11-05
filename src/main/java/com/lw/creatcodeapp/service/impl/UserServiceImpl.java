@@ -119,6 +119,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>  implements U
     }
 
     @Override
+    public boolean userLogout(HttpServletRequest request) {
+        //判断用户是否登录
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        if(userObj == null){
+            throw new BusinessException(ErrorCode.OPERATION_ERROR,"用户未登录");
+        }
+        //移除用户登录态
+        request.getSession().removeAttribute(USER_LOGIN_STATE);
+
+        return true;
+    }
+
+    @Override
 /**
 * 获取加密后的密码
 * 使用MD5算法对密码进行加密，并添加盐值(salt)增加安全性
