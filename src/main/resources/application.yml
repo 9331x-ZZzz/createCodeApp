@@ -1,6 +1,12 @@
 spring:
   application:
     name: creatCodeApp-backend
+  # mysql
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/createcodeapp
+    username: root
+    password: Wmh0119...
 server:
   port: 8123
   servlet:
@@ -16,4 +22,3 @@ knife4j:
   enable: true
   setting:
     language: zh_cn
-

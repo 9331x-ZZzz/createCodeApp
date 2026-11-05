@@ -1,33 +1,37 @@
 HELP.md
+# --- 编译产物 ---
+*.class
+
+# --- Maven 构建输出 ---
 target/
-.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
+# --- Maven Wrapper (通常建议保留 jar 以便他人无需安装 Maven) ---
+# .mvn/wrapper/maven-wrapper.jar
 
-### IntelliJ IDEA ###
-.idea
-*.iws
+# --- 日志与崩溃文件 ---
+*.log
+hs_err_pid*
+replay_pid*
+
+# --- 常用 IDE 配置 (根据你使用的工具选择) ---
+# IntelliJ IDEA
+.idea/
 *.iml
+*.iws
 *.ipr
+out/
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### VS Code ###
+# VS Code
 .vscode/
+
+# --- 操作系统文件 ---
+.DS_Store
+Thumbs.db
