@@ -2,6 +2,7 @@ HELP.md
 # ---CUSTOM---
 # --- 项目配置文件 ---
 application-local.yml
+tmp/
 # --- 编译产物 ---
 *.class
 

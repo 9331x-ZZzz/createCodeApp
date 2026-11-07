@@ -1,5 +1,7 @@
 package com.lw.creatcodeapp.ai;
 
+import com.lw.creatcodeapp.ai.model.HtmlCodeResult;
+import com.lw.creatcodeapp.ai.model.MultiFileCodeResult;
 import dev.langchain4j.service.SystemMessage;
 
 public interface AiCodeGeneratorService {
