@@ -1,16 +1,21 @@
 package com.lw.creatcodeapp.core;
 
+import cn.hutool.json.JSONUtil;
 import com.lw.creatcodeapp.ai.AiCodeGeneratorService;
 import com.lw.creatcodeapp.ai.AiCodeGeneratorServiceFactory;
 import com.lw.creatcodeapp.ai.model.HtmlCodeResult;
 import com.lw.creatcodeapp.ai.model.MultiFileCodeResult;
+import com.lw.creatcodeapp.ai.model.message.AiResponseMessage;
 import com.lw.creatcodeapp.exception.BusinessException;
 import com.lw.creatcodeapp.exception.ErrorCode;
 import com.lw.creatcodeapp.model.enums.CodeGenTypeEnum;
+import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.service.TokenStream;
+import dev.langchain4j.service.tool.ToolExecution;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
+import reactor.core.publisher.Flux;
 import java.io.File;
 
 /**

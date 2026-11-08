@@ -2,7 +2,11 @@ package com.lw.creatcodeapp.ai;
 
 import com.lw.creatcodeapp.ai.model.HtmlCodeResult;
 import com.lw.creatcodeapp.ai.model.MultiFileCodeResult;
+import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
+import dev.langchain4j.service.TokenStream;
+import dev.langchain4j.service.UserMessage;
+import reactor.core.publisher.Flux;
 
 public interface AiCodeGeneratorService {
 
