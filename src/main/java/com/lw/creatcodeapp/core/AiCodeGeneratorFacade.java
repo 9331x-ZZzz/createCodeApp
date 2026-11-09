@@ -6,6 +6,12 @@ import com.lw.creatcodeapp.ai.AiCodeGeneratorServiceFactory;
 import com.lw.creatcodeapp.ai.model.HtmlCodeResult;
 import com.lw.creatcodeapp.ai.model.MultiFileCodeResult;
 import com.lw.creatcodeapp.ai.model.message.AiResponseMessage;
+import com.lw.creatcodeapp.ai.model.message.ToolExecutedMessage;
+import com.lw.creatcodeapp.ai.model.message.ToolRequestMessage;
+import com.lw.creatcodeapp.constant.AppConstant;
+import com.lw.creatcodeapp.core.builder.VueProjectBuilder;
+import com.lw.creatcodeapp.core.parser.CodeParserExecutor;
+import com.lw.creatcodeapp.core.saver.CodeFileSaverExecutor;
 import com.lw.creatcodeapp.exception.BusinessException;
 import com.lw.creatcodeapp.exception.ErrorCode;
 import com.lw.creatcodeapp.model.enums.CodeGenTypeEnum;
@@ -16,8 +22,8 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
-import java.io.File;
 
+import java.io.File;
 /**
  * AI 代码生成门面类，组合代码生成和保存功能
  */
@@ -108,10 +114,10 @@ public class AiCodeGeneratorFacade {
                         AiResponseMessage aiResponseMessage = new AiResponseMessage(partialResponse);
                         sink.next(JSONUtil.toJsonStr(aiResponseMessage));
                     })
-                    .onPartialToolExecutionRequest((index, toolExecutionRequest) -> {
-                        ToolRequestMessage toolRequestMessage = new ToolRequestMessage(toolExecutionRequest);
-                        sink.next(JSONUtil.toJsonStr(toolRequestMessage));
-                    })
+//                    .onPartialToolExecutionRequest((index, toolExecutionRequest) -> {
+//                        ToolRequestMessage toolRequestMessage = new ToolRequestMessage(toolExecutionRequest);
+//                        sink.next(JSONUtil.toJsonStr(toolRequestMessage));
+//                    })
                     .onToolExecuted((ToolExecution toolExecution) -> {
                         ToolExecutedMessage toolExecutedMessage = new ToolExecutedMessage(toolExecution);
                         sink.next(JSONUtil.toJsonStr(toolExecutedMessage));

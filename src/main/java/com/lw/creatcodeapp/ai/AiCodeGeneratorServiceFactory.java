@@ -1,5 +1,8 @@
 package com.lw.creatcodeapp.ai;
 
+import cn.hutool.cache.Cache;
+import com.lw.creatcodeapp.exception.BusinessException;
+import com.lw.creatcodeapp.exception.ErrorCode;
 import com.lw.creatcodeapp.model.enums.CodeGenTypeEnum;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
@@ -29,8 +32,8 @@ public class AiCodeGeneratorServiceFactory {
     @Resource
     private ChatHistoryService chatHistoryService;
 
-    @Resource
-    private ToolManager toolManager;
+//    @Resource
+//    private ToolManager toolManager;
 
     /**
      * AI 服务实例缓存
