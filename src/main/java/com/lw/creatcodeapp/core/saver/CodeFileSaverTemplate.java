@@ -3,9 +3,11 @@ package com.lw.creatcodeapp.core.saver;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import com.lw.creatcodeapp.constant.AppConstant;
 import com.lw.creatcodeapp.exception.BusinessException;
 import com.lw.creatcodeapp.exception.ErrorCode;
 import com.lw.creatcodeapp.model.enums.CodeGenTypeEnum;
+
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 
@@ -17,7 +19,8 @@ import java.nio.charset.StandardCharsets;
 public abstract class CodeFileSaverTemplate<T> {
 
     // 文件保存根目录
-    protected static final String FILE_SAVE_ROOT_DIR = System.getProperty("user.dir") + "/tmp/code_output";
+    protected static final String FILE_SAVE_ROOT_DIR = AppConstant.CODE_OUTPUT_ROOT_DIR;
+
 
     /**
      * 模板方法：保存代码的标准流程（使用 appId）

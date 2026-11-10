@@ -12,10 +12,7 @@ import com.lw.creatcodeapp.constant.UserConstant;
 import com.lw.creatcodeapp.exception.BusinessException;
 import com.lw.creatcodeapp.exception.ErrorCode;
 import com.lw.creatcodeapp.exception.ThrowUtils;
-import com.lw.creatcodeapp.model.dto.app.AppAddRequest;
-import com.lw.creatcodeapp.model.dto.app.AppAdminUpdateRequest;
-import com.lw.creatcodeapp.model.dto.app.AppQueryRequest;
-import com.lw.creatcodeapp.model.dto.app.AppUpdateRequest;
+import com.lw.creatcodeapp.model.dto.app.*;
 import com.lw.creatcodeapp.model.entity.App;
 import com.lw.creatcodeapp.model.entity.User;
 import com.lw.creatcodeapp.model.enums.CodeGenTypeEnum;
@@ -23,7 +20,8 @@ import com.lw.creatcodeapp.model.vo.AppVO;
 import com.lw.creatcodeapp.service.AppService;
 import com.lw.creatcodeapp.service.UserService;
 import com.mybatisflex.core.paginate.Page;
-import com.mybatisflex.core.query.QueryWrapper;import jakarta.annotation.Resource;
+import com.mybatisflex.core.query.QueryWrapper;
+import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -224,6 +222,26 @@ public class AppController {
         boolean result = appService.removeById(id);
         return ResultUtils.success(result);
     }
+
+    /**
+     * 应用部署
+     *
+     * @param appDeployRequest 部署请求
+     * @param request          请求
+     * @return 部署 URL
+     */
+    @PostMapping("/deploy")
+    public BaseResponse<String> deployApp(@RequestBody AppDeployRequest appDeployRequest, HttpServletRequest request) {
+        ThrowUtils.throwIf(appDeployRequest == null, ErrorCode.PARAMS_ERROR);
+        Long appId = appDeployRequest.getAppId();
+        ThrowUtils.throwIf(appId == null || appId <= 0, ErrorCode.PARAMS_ERROR, "应用 ID 不能为空");
+        // 获取当前登录用户
+        User loginUser = userService.getLoginUser(request);
+        // 调用服务部署应用
+        String deployUrl = appService.deployApp(appId, loginUser);
+        return ResultUtils.success(deployUrl);
+    }
+
     /**
      * 管理员更新应用
      *
