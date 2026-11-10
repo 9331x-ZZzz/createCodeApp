@@ -10,7 +10,7 @@ import java.util.regex.Matcher;
  * 代码解析器
  * 提供静态方法解析不同类型的代码内容
  *
- * @author yupi
+ * @author 9331x
  */
 @Deprecated
 public class CodeParser {
