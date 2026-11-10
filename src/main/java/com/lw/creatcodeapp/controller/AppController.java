@@ -2,6 +2,7 @@ package com.lw.creatcodeapp.controller;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
+import com.lw.creatcodeapp.annotation.AuthCheck;
 import com.lw.creatcodeapp.common.BaseResponse;
 import com.lw.creatcodeapp.common.DeleteRequest;
 import com.lw.creatcodeapp.common.ResultUtils;
@@ -11,6 +12,7 @@ import com.lw.creatcodeapp.exception.BusinessException;
 import com.lw.creatcodeapp.exception.ErrorCode;
 import com.lw.creatcodeapp.exception.ThrowUtils;
 import com.lw.creatcodeapp.model.dto.app.AppAddRequest;
+import com.lw.creatcodeapp.model.dto.app.AppAdminUpdateRequest;
 import com.lw.creatcodeapp.model.dto.app.AppQueryRequest;
 import com.lw.creatcodeapp.model.dto.app.AppUpdateRequest;
 import com.lw.creatcodeapp.model.entity.App;
@@ -23,8 +25,10 @@ import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,6 +39,7 @@ import java.util.List;
  *
  * @author <a href="https://github.com/9331x-ZZzz">9331x</a>
  */
+@RestController
 public class AppController {
 
     @Resource private AppService appService;
@@ -78,7 +83,9 @@ public class AppController {
     @PostMapping("/update")
     public BaseResponse<Boolean> updateApp(@RequestBody AppUpdateRequest appUpdateRequest, HttpServletRequest request) {
     // 校验请求参数，如果请求为空或ID为空，则抛出参数错误异常
-        ThrowUtils.throwIf(appUpdateRequest == null || appUpdateRequest.getId() == null, ErrorCode.PARAMS_ERROR);
+        if (appUpdateRequest == null || appUpdateRequest.getId() == null){
+           throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
         // 参数校验
         User loginUser = userService.getLoginUser(request);
         long id = appUpdateRequest.getId();
@@ -86,7 +93,7 @@ public class AppController {
         App oldapp = appService.getById(id);
         ThrowUtils.throwIf(oldapp == null, ErrorCode.NOT_FOUND_ERROR);
         // 仅本人可更新
-        if(!oldapp.getId().equals(loginUser.getId())){
+        if(!oldapp.getUserId().equals(loginUser.getId())){
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         App app = new App();
@@ -130,7 +137,7 @@ public class AppController {
      * @return 返回包含应用详细信息的BaseResponse，其中数据为AppVO对象
      */
     @PostMapping("/get/vo")
-    public BaseResponse<AppVO> getAppVO(long id) {
+    public BaseResponse<AppVO> getAppVOById(long id) {
     // 参数校验：如果id小于等于0，则抛出参数错误异常
         ThrowUtils.throwIf(id <= 0, ErrorCode.PARAMS_ERROR);
         // 查询数据库获取应用信息
@@ -190,6 +197,87 @@ public class AppController {
         List<AppVO> appVOList = appService.getAppVOList(appPage.getRecords());
         appVOPage.setRecords(appVOList);
         return ResultUtils.success(appVOPage);
+    }
+    /**
+     * 管理员删除应用
+     *
+     * @param deleteRequest 删除请求
+     * @return 删除结果
+     */
+    @PostMapping("/admin/delete")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<Boolean> deleteAppByAdmin(@RequestBody DeleteRequest deleteRequest) {
+        if (deleteRequest == null || deleteRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        long id = deleteRequest.getId();
+        // 判断是否存在
+        App oldApp = appService.getById(id);
+        ThrowUtils.throwIf(oldApp == null, ErrorCode.NOT_FOUND_ERROR);
+        boolean result = appService.removeById(id);
+        return ResultUtils.success(result);
+    }
+    /**
+     * 管理员更新应用
+     *
+     * @param appAdminUpdateRequest 更新请求
+     * @return 更新结果
+     */
+    @PostMapping("/admin/update")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<Boolean> updateAppByAdmin(@RequestBody AppAdminUpdateRequest appAdminUpdateRequest) {
+        if (appAdminUpdateRequest == null || appAdminUpdateRequest.getId() == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        long id = appAdminUpdateRequest.getId();
+        // 判断是否存在
+        App oldApp = appService.getById(id);
+        ThrowUtils.throwIf(oldApp == null, ErrorCode.NOT_FOUND_ERROR);
+        App app = new App();
+        BeanUtil.copyProperties(appAdminUpdateRequest, app);
+        // 设置编辑时间
+        app.setEditTime(LocalDateTime.now());
+        boolean result = appService.updateById(app);
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        return ResultUtils.success(true);
+    }
+
+    /**
+     * 管理员分页获取应用列表
+     *
+     * @param appQueryRequest 查询请求
+     * @return 应用列表
+     */
+    @PostMapping("/admin/list/page/vo")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<Page<AppVO>> listAppVOByPageByAdmin(@RequestBody AppQueryRequest appQueryRequest) {
+        ThrowUtils.throwIf(appQueryRequest == null, ErrorCode.PARAMS_ERROR);
+        long pageNum = appQueryRequest.getPageNum();
+        long pageSize = appQueryRequest.getPageSize();
+        QueryWrapper queryWrapper = appService.getQueryWrapper(appQueryRequest);
+        Page<App> appPage = appService.page(Page.of(pageNum, pageSize), queryWrapper);
+        // 数据封装
+        Page<AppVO> appVOPage = new Page<>(pageNum, pageSize, appPage.getTotalRow());
+        List<AppVO> appVOList = appService.getAppVOList(appPage.getRecords());
+        appVOPage.setRecords(appVOList);
+        return ResultUtils.success(appVOPage);
+    }
+
+    /**
+     * 管理员根据 id 获取应用详情
+     *
+     * @param id 应用 id
+     * @return 应用详情
+     */
+    @GetMapping("/admin/get/vo")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<AppVO> getAppVOByIdByAdmin(long id) {
+        ThrowUtils.throwIf(id <= 0, ErrorCode.PARAMS_ERROR);
+        // 查询数据库
+        App app = appService.getById(id);
+        ThrowUtils.throwIf(app == null, ErrorCode.NOT_FOUND_ERROR);
+        // 获取封装类
+        return ResultUtils.success(appService.getAppVO(app));
     }
 
 
