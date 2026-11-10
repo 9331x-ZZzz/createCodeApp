@@ -9,12 +9,12 @@ import com.lw.creatcodeapp.model.enums.CodeGenTypeEnum;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 
 
 /**
  * 代码文件保存器
  */
+@Deprecated
 public class CodeFileSaver {
 
     //文件保存的根目录
