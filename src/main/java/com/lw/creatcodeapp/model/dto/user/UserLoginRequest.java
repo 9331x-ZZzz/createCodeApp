@@ -1,4 +1,4 @@
-package com.lw.creatcodeapp.model.dto;
+package com.lw.creatcodeapp.model.dto.user;
 
 import lombok.Data;
 
