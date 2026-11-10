@@ -1,24 +1,196 @@
 package com.lw.creatcodeapp.controller;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
+import com.lw.creatcodeapp.common.BaseResponse;
+import com.lw.creatcodeapp.common.DeleteRequest;
+import com.lw.creatcodeapp.common.ResultUtils;
+import com.lw.creatcodeapp.constant.AppConstant;
+import com.lw.creatcodeapp.constant.UserConstant;
+import com.lw.creatcodeapp.exception.BusinessException;
+import com.lw.creatcodeapp.exception.ErrorCode;
+import com.lw.creatcodeapp.exception.ThrowUtils;
+import com.lw.creatcodeapp.model.dto.app.AppAddRequest;
+import com.lw.creatcodeapp.model.dto.app.AppQueryRequest;
+import com.lw.creatcodeapp.model.dto.app.AppUpdateRequest;
+import com.lw.creatcodeapp.model.entity.App;
+import com.lw.creatcodeapp.model.entity.User;
+import com.lw.creatcodeapp.model.enums.CodeGenTypeEnum;
+import com.lw.creatcodeapp.model.vo.AppVO;
+import com.lw.creatcodeapp.service.AppService;
 import com.lw.creatcodeapp.service.UserService;
 import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.beans.factory.annotation.Autowired;
-import com.lw.creatcodeapp.model.entity.App;
-import com.lw.creatcodeapp.service.AppService;
-import org.springframework.web.bind.annotation.RestController;
+
+import java.time.LocalDateTime;
 import java.util.List;
+
 
 /**
  * 应用 控制层。
  *
  * @author <a href="https://github.com/9331x-ZZzz">9331x</a>
  */
+public class AppController {
 
+    @Resource private AppService appService;
+
+    @Resource private UserService userService;
+    /**
+     * 创建应用
+     *
+     * @param appAddRequest 创建应用请求
+     * @param request       请求
+     * @return 应用 id
+     */
+    @PostMapping("/add")
+    public BaseResponse<Long> addApp(@RequestBody AppAddRequest appAddRequest, HttpServletRequest request) {
+        ThrowUtils.throwIf(appAddRequest == null, ErrorCode.PARAMS_ERROR);
+        // 参数校验
+        String initPrompt = appAddRequest.getInitPrompt();
+        ThrowUtils.throwIf(StrUtil.isBlank(initPrompt), ErrorCode.PARAMS_ERROR, "初始化 prompt 不能为空");
+        // 获取当前登录用户
+        User loginUser = userService.getLoginUser(request);
+        // 构造入库对象
+        App app = new App();
+        BeanUtil.copyProperties(appAddRequest, app);
+        app.setUserId(loginUser.getId());
+        // 应用名称暂时为 initPrompt 前 12 位
+        app.setAppName(initPrompt.substring(0, Math.min(initPrompt.length(), 12)));
+        // 暂时设置为多文件生成
+        app.setCodeGenType(CodeGenTypeEnum.MULTI_FILE.getValue());
+        // 插入数据库
+        boolean result = appService.save(app);
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        return ResultUtils.success(app.getId());
+    }
+
+    /**
+     * 更新应用接口
+     * @param appUpdateRequest 应用更新请求参数
+     * @param request HTTP请求对象，用于获取当前登录用户信息
+     * @return 返回操作结果，成功返回true，失败返回错误信息
+     */
+    @PostMapping("/update")
+    public BaseResponse<Boolean> updateApp(@RequestBody AppUpdateRequest appUpdateRequest, HttpServletRequest request) {
+    // 校验请求参数，如果请求为空或ID为空，则抛出参数错误异常
+        ThrowUtils.throwIf(appUpdateRequest == null || appUpdateRequest.getId() == null, ErrorCode.PARAMS_ERROR);
+        // 参数校验
+        User loginUser = userService.getLoginUser(request);
+        long id = appUpdateRequest.getId();
+        // 判断是否存在
+        App oldapp = appService.getById(id);
+        ThrowUtils.throwIf(oldapp == null, ErrorCode.NOT_FOUND_ERROR);
+        // 仅本人可更新
+        if(!oldapp.getId().equals(loginUser.getId())){
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        App app = new App();
+        app.setId(id);
+        app.setAppName(appUpdateRequest.getAppName());
+        // 设置编辑时间
+        app.setEditTime(LocalDateTime.now());
+        boolean result = appService.updateById(app);
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        return ResultUtils.success(true);
+    }
+
+    /**
+     * 删除应用（用户只能删除自己的应用）
+     *
+     * @param deleteRequest 删除请求
+     * @param request       请求
+     * @return 删除结果
+     */
+    @PostMapping("/delete")
+    public BaseResponse<Boolean> deleteApp(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
+        if (deleteRequest == null || deleteRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        long id = deleteRequest.getId();
+        // 判断是否存在
+        App oldApp = appService.getById(id);
+        ThrowUtils.throwIf(oldApp == null, ErrorCode.NOT_FOUND_ERROR);
+        // 仅本人或管理员可删除
+        if (!oldApp.getUserId().equals(loginUser.getId()) && !UserConstant.ADMIN_ROLE.equals(loginUser.getUserRole())) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        boolean result = appService.removeById(id);
+        return ResultUtils.success(result);
+    }
+
+    /**
+     * 获取封装的应用
+     * @param id 以应用id来返回
+     * @return 返回包含应用详细信息的BaseResponse，其中数据为AppVO对象
+     */
+    @PostMapping("/get/vo")
+    public BaseResponse<AppVO> getAppVO(long id) {
+    // 参数校验：如果id小于等于0，则抛出参数错误异常
+        ThrowUtils.throwIf(id <= 0, ErrorCode.PARAMS_ERROR);
+        // 查询数据库获取应用信息
+        App app = appService.getById(id);
+    // 检查应用是否存在，如果不存在则抛出未找到错误异常
+        ThrowUtils.throwIf(app == null, ErrorCode.NOT_FOUND_ERROR);
+        // 获取封装类（包含用户信息）并返回成功响应
+        return ResultUtils.success(appService.getAppVO(app));
+    }
+
+    /**
+     * 分页获取当前用户创建的应用列表
+     *
+     * @param appQueryRequest 查询请求
+     * @param request         请求
+     * @return 应用列表
+     */
+    @PostMapping("/my/list/page/vo")
+    public BaseResponse<Page<AppVO>> listMyAppVOByPage(@RequestBody AppQueryRequest appQueryRequest, HttpServletRequest request) {
+        ThrowUtils.throwIf(appQueryRequest == null, ErrorCode.PARAMS_ERROR);
+        User loginUser = userService.getLoginUser(request);
+        // 限制每页最多 20 个
+        long pageSize = appQueryRequest.getPageSize();
+        ThrowUtils.throwIf(pageSize > 20, ErrorCode.PARAMS_ERROR, "每页最多查询 20 个应用");
+        long pageNum = appQueryRequest.getPageNum();
+        // 只查询当前用户的应用
+        appQueryRequest.setUserId(loginUser.getId());
+        QueryWrapper queryWrapper = appService.getQueryWrapper(appQueryRequest);
+        Page<App> appPage = appService.page(Page.of(pageNum, pageSize), queryWrapper);
+        // 数据封装
+        Page<AppVO> appVOPage = new Page<>(pageNum, pageSize, appPage.getTotalRow());
+        List<AppVO> appVOList = appService.getAppVOList(appPage.getRecords());
+        appVOPage.setRecords(appVOList);
+        return ResultUtils.success(appVOPage);
+    }
+
+    /**
+     * 分页获取精选应用列表
+     *
+     * @param appQueryRequest 查询请求
+     * @return 精选应用列表
+     */
+    @PostMapping("/good/list/page/vo")
+    public BaseResponse<Page<AppVO>> listGoodAppVOByPage(@RequestBody AppQueryRequest appQueryRequest) {
+        ThrowUtils.throwIf(appQueryRequest == null, ErrorCode.PARAMS_ERROR);
+        // 限制每页最多 20 个
+        long pageSize = appQueryRequest.getPageSize();
+        ThrowUtils.throwIf(pageSize > 20, ErrorCode.PARAMS_ERROR, "每页最多查询 20 个应用");
+        long pageNum = appQueryRequest.getPageNum();
+        // 只查询精选的应用
+        appQueryRequest.setPriority(AppConstant.GOOD_APP_PRIORITY);
+        QueryWrapper queryWrapper = appService.getQueryWrapper(appQueryRequest);
+        // 分页查询
+        Page<App> appPage = appService.page(Page.of(pageNum, pageSize), queryWrapper);
+        // 数据封装
+        Page<AppVO> appVOPage = new Page<>(pageNum, pageSize, appPage.getTotalRow());
+        List<AppVO> appVOList = appService.getAppVOList(appPage.getRecords());
+        appVOPage.setRecords(appVOList);
+        return ResultUtils.success(appVOPage);
+    }
+
+
+}
