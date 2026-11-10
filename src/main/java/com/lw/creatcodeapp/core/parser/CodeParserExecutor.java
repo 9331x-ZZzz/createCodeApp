@@ -8,7 +8,7 @@ import com.lw.creatcodeapp.model.enums.CodeGenTypeEnum;
  * 代码解析执行器
  * 根据代码生成类型执行相应的解析逻辑
  *
- * @author yupi
+ * @author 9331x
  */
 public class CodeParserExecutor {
 
@@ -19,15 +19,15 @@ public class CodeParserExecutor {
     /**
      * 执行代码解析
      *
-     * @param codeContent     代码内容
-     * @param codeGenTypeEnum 代码生成类型
+     * @param codeContent 代码内容
+     * @param codeGenType 代码生成类型
      * @return 解析结果（HtmlCodeResult 或 MultiFileCodeResult）
      */
-    public static Object executeParser(String codeContent, CodeGenTypeEnum codeGenTypeEnum) {
-        return switch (codeGenTypeEnum) {
+    public static Object executeParser(String codeContent, CodeGenTypeEnum codeGenType) {
+        return switch (codeGenType) {
             case HTML -> htmlCodeParser.parseCode(codeContent);
             case MULTI_FILE -> multiFileCodeParser.parseCode(codeContent);
-            default -> throw new BusinessException(ErrorCode.SYSTEM_ERROR, "不支持的代码生成类型");
+            default -> throw new BusinessException(ErrorCode.SYSTEM_ERROR, "不支持的代码生成类型: " + codeGenType);
         };
     }
 }

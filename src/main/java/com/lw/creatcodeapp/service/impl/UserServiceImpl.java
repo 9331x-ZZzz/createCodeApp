@@ -5,7 +5,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.lw.creatcodeapp.exception.BusinessException;
 import com.lw.creatcodeapp.exception.ErrorCode;
-import com.lw.creatcodeapp.model.dto.UserQueryRequest;
+import com.lw.creatcodeapp.model.dto.user.UserQueryRequest;
 import com.lw.creatcodeapp.model.enums.UserRoleEnum;
 import com.lw.creatcodeapp.model.vo.LoginUserVO;
 import com.lw.creatcodeapp.model.vo.UserVO;

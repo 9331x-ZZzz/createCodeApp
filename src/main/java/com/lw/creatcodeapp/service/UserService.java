@@ -1,6 +1,6 @@
 package com.lw.creatcodeapp.service;
 
-import com.lw.creatcodeapp.model.dto.UserQueryRequest;
+import com.lw.creatcodeapp.model.dto.user.UserQueryRequest;
 import com.lw.creatcodeapp.model.vo.LoginUserVO;
 import com.lw.creatcodeapp.model.vo.UserVO;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -8,7 +8,6 @@ import com.mybatisflex.core.service.IService;
 import com.lw.creatcodeapp.model.entity.User;
 import jakarta.servlet.http.HttpServletRequest;
 
-import java.net.http.HttpRequest;
 import java.util.List;
 
 /**

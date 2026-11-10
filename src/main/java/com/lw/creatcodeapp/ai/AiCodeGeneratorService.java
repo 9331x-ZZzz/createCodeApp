@@ -25,7 +25,7 @@ public interface AiCodeGeneratorService {
      * @param userMessage 用户提示词
      * @return AI 的输出结果
      */
-    @SystemMessage(fromResource = "prompt/codegen-multi-file-system-prompt.txt")
+    @SystemMessage(fromResource = "prompt/codegen-multifile-system-prompt.txt")
     MultiFileCodeResult generateMultiFileCode(String userMessage);
 
     /**
@@ -52,6 +52,6 @@ public interface AiCodeGeneratorService {
      * @param userMessage 用户提示词
      * @return AI 的输出结果
      */
-    @SystemMessage(fromResource = "prompt/codegen-vue-project-system-prompt.txt")
-    TokenStream generateVueProjectCodeStream(@MemoryId long appId, @UserMessage String userMessage);
+//    @SystemMessage(fromResource = "prompt/codegen-vue-project-system-prompt.txt")
+//    TokenStream generateVueProjectCodeStream(@MemoryId long appId, @UserMessage String userMessage);
 }

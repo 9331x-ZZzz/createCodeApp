@@ -8,12 +8,11 @@ import java.util.regex.Pattern;
 /**
  * HTML 单文件代码解析器
  *
- * @author yupi
+ * @author 9331x
  */
 public class HtmlCodeParser implements CodeParser<HtmlCodeResult> {
 
-    private static final Pattern HTML_CODE_PATTERN =
-            Pattern.compile("```html\\s*\\n([\\s\\S]*?)```", Pattern.CASE_INSENSITIVE);
+    private static final Pattern HTML_CODE_PATTERN = Pattern.compile("```html\\s*\\n([\\s\\S]*?)```", Pattern.CASE_INSENSITIVE);
 
     @Override
     public HtmlCodeResult parseCode(String codeContent) {
@@ -30,7 +29,7 @@ public class HtmlCodeParser implements CodeParser<HtmlCodeResult> {
     }
 
     /**
-     * 提取 HTML 代码内容
+     * 提取HTML代码内容
      *
      * @param content 原始内容
      * @return HTML代码
