@@ -27,7 +27,6 @@ import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -50,11 +49,11 @@ import java.util.stream.Collectors;
 public class AppServiceImpl extends ServiceImpl<AppMapper, App>  implements AppService{
 
     @Resource
-    UserService userService;
+    private UserService userService;
 
     @Resource
-    AiCodeGeneratorFacade aiCodeGeneratorFacade;
-    @Autowired
+    private AiCodeGeneratorFacade aiCodeGeneratorFacade;
+    @Resource
     private ChatHistoryService chatHistoryService;
 
     @Override

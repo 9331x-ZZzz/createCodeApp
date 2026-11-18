@@ -60,7 +60,14 @@ import java.time.LocalDateTime;
                                                User loginUser);
 
 
+    /**
+     * 将聊天历史记录加载到内存中
+     *
+     * @param appId 应用程序ID，用于标识特定的应用程序
+     * @param chatMessage 聊天记忆对象，用于存储加载的聊天历史
+     * @param maxCount 最大加载的消息数量，用于限制加载的历史记录条数
+     * @return 返回实际加载到内存中的消息数量
+     */
     int loadChatHistoryToMemory(Long appId, MessageWindowChatMemory chatMemory, int maxCount);
-
 
 }

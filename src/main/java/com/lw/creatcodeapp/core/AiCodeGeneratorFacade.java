@@ -1,23 +1,14 @@
 package com.lw.creatcodeapp.core;
 
-import cn.hutool.json.JSONUtil;
 import com.lw.creatcodeapp.ai.AiCodeGeneratorService;
 import com.lw.creatcodeapp.ai.AiCodeGeneratorServiceFactory;
 import com.lw.creatcodeapp.ai.model.HtmlCodeResult;
 import com.lw.creatcodeapp.ai.model.MultiFileCodeResult;
-import com.lw.creatcodeapp.ai.model.message.AiResponseMessage;
-import com.lw.creatcodeapp.ai.model.message.ToolExecutedMessage;
-import com.lw.creatcodeapp.ai.model.message.ToolRequestMessage;
-import com.lw.creatcodeapp.constant.AppConstant;
-import com.lw.creatcodeapp.core.builder.VueProjectBuilder;
 import com.lw.creatcodeapp.core.parser.CodeParserExecutor;
 import com.lw.creatcodeapp.core.saver.CodeFileSaverExecutor;
 import com.lw.creatcodeapp.exception.BusinessException;
 import com.lw.creatcodeapp.exception.ErrorCode;
 import com.lw.creatcodeapp.model.enums.CodeGenTypeEnum;
-import dev.langchain4j.model.chat.response.ChatResponse;
-import dev.langchain4j.service.TokenStream;
-import dev.langchain4j.service.tool.ToolExecution;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -50,7 +41,7 @@ public class AiCodeGeneratorFacade {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "生成类型为空");
         }
         //根据 appId 获取相应的 AI 服务实例
-        AiCodeGeneratorService aiCodeGeneratorService = aiCodeGeneratorServiceFactory.getAiCodeGeneratorService(appId);
+        AiCodeGeneratorService aiCodeGeneratorService = aiCodeGeneratorServiceFactory.getAiCodeGeneratorService(appId,codeGenTypeEnum);
         return switch (codeGenTypeEnum) {
             case HTML -> {
                 HtmlCodeResult result = aiCodeGeneratorService.generateHtmlCode(userMessage);
@@ -74,10 +65,12 @@ public class AiCodeGeneratorFacade {
      * @param codeGenTypeEnum 生成类型
      * @param appId 应用id
      */
-    public Flux<String> generateAndSaveCodeStream(String userMessage, CodeGenTypeEnum codeGenTypeEnum,Long appId) {
+    public Flux<String> generateAndSaveCodeStream(String userMessage, CodeGenTypeEnum codeGenTypeEnum, Long appId) {
         if (codeGenTypeEnum == null) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "生成类型为空");
         }
+        // 根据 appId 获取相应的 AI 服务实例
+        AiCodeGeneratorService aiCodeGeneratorService = aiCodeGeneratorServiceFactory.getAiCodeGeneratorService(appId, codeGenTypeEnum);
         return switch (codeGenTypeEnum) {
             case HTML -> {
                 Flux<String> codeStream = aiCodeGeneratorService.generateHtmlCodeStream(userMessage);
@@ -85,6 +78,10 @@ public class AiCodeGeneratorFacade {
             }
             case MULTI_FILE -> {
                 Flux<String> codeStream = aiCodeGeneratorService.generateMultiFileCodeStream(userMessage);
+                yield processCodeStream(codeStream, CodeGenTypeEnum.MULTI_FILE,appId);
+            }
+            case VUE_PROJECT ->{
+                Flux<String> codeStream = aiCodeGeneratorService.generateVueProjectCodeStream(appId,userMessage);
                 yield processCodeStream(codeStream, CodeGenTypeEnum.MULTI_FILE,appId);
             }
             default -> {
