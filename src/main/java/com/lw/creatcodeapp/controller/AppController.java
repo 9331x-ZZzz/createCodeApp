@@ -23,11 +23,9 @@ import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -42,13 +40,15 @@ import java.util.Map;
  * @author <a href="https://github.com/9331x-ZZzz">9331x</a>
  */
 @RestController
+@RequestMapping("/app")
 public class AppController {
 
-    @Resource private AppService appService;
+    @Resource
+    private AppService appService;
 
-    @Resource private UserService userService;
-    @Autowired
-    private RestClient.Builder builder;
+    @Resource
+    private UserService userService;
+
 
     /**
      * 创建应用
@@ -71,8 +71,8 @@ public class AppController {
         app.setUserId(loginUser.getId());
         // 应用名称暂时为 initPrompt 前 12 位
         app.setAppName(initPrompt.substring(0, Math.min(initPrompt.length(), 12)));
-        // 暂时设置为多文件生成
-        app.setCodeGenType(CodeGenTypeEnum.MULTI_FILE.getValue());
+        // 暂时设置为VUE文件内生成
+        app.setCodeGenType(CodeGenTypeEnum.VUE_PROJECT.getValue());
         // 插入数据库
         boolean result = appService.save(app);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
@@ -141,7 +141,7 @@ public class AppController {
      * @param id 以应用id来返回
      * @return 返回包含应用详细信息的BaseResponse，其中数据为AppVO对象
      */
-    @PostMapping("/get/vo")
+    @GetMapping("/get/vo")
     public BaseResponse<AppVO> getAppVOById(long id) {
     // 参数校验：如果id小于等于0，则抛出参数错误异常
         ThrowUtils.throwIf(id <= 0, ErrorCode.PARAMS_ERROR);
