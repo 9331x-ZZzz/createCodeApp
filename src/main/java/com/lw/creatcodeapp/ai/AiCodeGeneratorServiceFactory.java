@@ -2,7 +2,7 @@ package com.lw.creatcodeapp.ai;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.lw.creatcodeapp.ai.tools.FileWriteTool;
+import com.lw.creatcodeapp.ai.tools.*;
 import com.lw.creatcodeapp.exception.BusinessException;
 import com.lw.creatcodeapp.exception.ErrorCode;
 import com.lw.creatcodeapp.model.enums.CodeGenTypeEnum;
@@ -67,8 +67,13 @@ public class AiCodeGeneratorServiceFactory {
                         case VUE_PROJECT -> AiServices.builder(AiCodeGeneratorService.class)
                                 .streamingChatModel(reasoningStreamingChatModel)
                                 .chatMemoryProvider(memoryId -> chatMemory)
-                                .tools(new FileWriteTool())
-                                //处理工具调用幻觉问题
+                                .tools(
+                                        new FileWriteTool(),
+                                        new FileReadTool(),
+                                        new FileModifyTool(),
+                                        new FileDirReadTool(),
+                                        new FileDeleteTool()
+                                )
                                 .hallucinatedToolNameStrategy(toolExecutionRequest -> ToolExecutionResultMessage.from(
                                         toolExecutionRequest, "Error: there is no tool called " + toolExecutionRequest.name()
                                 ))
