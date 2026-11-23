@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Slf4j
 @Configuration
-public class AiCodeGenTypeRoutingServiceFactory {
+public class AiCodeGenTypeRoutingServiceFactory{
 
     @Resource
     private ChatModel chatModel;
@@ -28,6 +28,5 @@ public class AiCodeGenTypeRoutingServiceFactory {
                 .chatModel(chatModel)
                 .build();
     }
-
 
 }
