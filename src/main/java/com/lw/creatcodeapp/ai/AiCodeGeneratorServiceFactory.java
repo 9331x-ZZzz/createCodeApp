@@ -43,6 +43,8 @@ public class AiCodeGeneratorServiceFactory {
         @Resource
         private StreamingChatModel reasoningStreamingChatModel;
 
+        @Resource
+        private ToolManager toolManager;
 
         /**
          * 创建新的 AI 服务实例
@@ -67,13 +69,7 @@ public class AiCodeGeneratorServiceFactory {
                         case VUE_PROJECT -> AiServices.builder(AiCodeGeneratorService.class)
                                 .streamingChatModel(reasoningStreamingChatModel)
                                 .chatMemoryProvider(memoryId -> chatMemory)
-                                .tools(
-                                        new FileWriteTool(),
-                                        new FileReadTool(),
-                                        new FileModifyTool(),
-                                        new FileDirReadTool(),
-                                        new FileDeleteTool()
-                                )
+                                .tools(toolManager.getAllTools())
                                 .hallucinatedToolNameStrategy(toolExecutionRequest -> ToolExecutionResultMessage.from(
                                         toolExecutionRequest, "Error: there is no tool called " + toolExecutionRequest.name()
                                 ))
