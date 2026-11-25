@@ -10,11 +10,11 @@ import org.springframework.context.annotation.Configuration;
 /**
  * AI代码生成类型路由服务工厂
  *
- * @author yupi
+ * @author 9331x
  */
 @Slf4j
 @Configuration
-public class AiCodeGenTypeRoutingServiceFactory{
+public class AiCodeGenTypeRoutingServiceFactory {
 
     @Resource
     private ChatModel chatModel;
@@ -28,5 +28,4 @@ public class AiCodeGenTypeRoutingServiceFactory{
                 .chatModel(chatModel)
                 .build();
     }
-
 }
