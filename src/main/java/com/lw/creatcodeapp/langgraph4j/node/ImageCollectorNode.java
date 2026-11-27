@@ -1,5 +1,6 @@
 package com.lw.creatcodeapp.langgraph4j.node;
 
+import cn.hutool.core.date.StopWatch;
 import com.lw.creatcodeapp.langgraph4j.ai.ImageCollectionPlanService;
 import com.lw.creatcodeapp.langgraph4j.model.ImageCollectionPlan;
 import com.lw.creatcodeapp.langgraph4j.model.ImageResource;
@@ -30,7 +31,9 @@ public class ImageCollectorNode {
             WorkflowContext context = WorkflowContext.getContext(state);
             String originalPrompt = context.getOriginalPrompt();
             List<ImageResource> collectedImages = new ArrayList<>();
-            
+            // 开头计时
+            StopWatch stopWatch = new StopWatch();
+            stopWatch.start();
             try {
                 // 第一步：获取图片收集计划
                 ImageCollectionPlanService planService = SpringContextUtil.getBean(ImageCollectionPlanService.class);
@@ -87,6 +90,9 @@ public class ImageCollectorNode {
             } catch (Exception e) {
                 log.error("图片收集失败: {}", e.getMessage(), e);
             }
+            // 结尾停止计时并输出结果
+            stopWatch.stop();
+            log.info("图片收集总耗时: {} ms", stopWatch.getTotalTimeMillis());
             // 更新状态
             context.setCurrentStep("图片收集");
             context.setImageList(collectedImages);
