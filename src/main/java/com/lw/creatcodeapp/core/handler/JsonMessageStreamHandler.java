@@ -6,8 +6,6 @@ import cn.hutool.json.JSONUtil;
 import com.lw.creatcodeapp.ai.model.message.*;
 import com.lw.creatcodeapp.ai.tools.BaseTool;
 import com.lw.creatcodeapp.ai.tools.ToolManager;
-import com.lw.creatcodeapp.constant.AppConstant;
-import com.lw.creatcodeapp.core.builder.VueProjectBuilder;
 import com.lw.creatcodeapp.model.entity.User;
 import com.lw.creatcodeapp.model.enums.ChatHistoryMessageTypeEnum;
 import com.lw.creatcodeapp.service.ChatHistoryService;
@@ -26,9 +24,6 @@ import java.util.Set;
 @Slf4j
 @Component
 public class JsonMessageStreamHandler {
-
-    @Resource
-    private VueProjectBuilder vueProjectBuilder;
 
     @Resource
     private ToolManager toolManager;
@@ -60,8 +55,6 @@ public class JsonMessageStreamHandler {
                     // 流式响应完成后，添加 AI 消息到对话历史
                     String aiResponse = chatHistoryStringBuilder.toString();
                     chatHistoryService.addChatMessage(appId, aiResponse, ChatHistoryMessageTypeEnum.AI.getValue(), loginUser.getId());
-                    String projectPath = AppConstant.CODE_OUTPUT_ROOT_DIR + "/vue_project_" + appId;
-                    vueProjectBuilder.buildProjectAsync(projectPath);
                 })
                 .doOnError(error -> {
                     // 如果AI回复失败，也要记录错误消息
@@ -93,9 +86,9 @@ public class JsonMessageStreamHandler {
                 if (toolId != null && !seenToolIds.contains(toolId)) {
                     // 第一次调用这个工具，记录 ID 并完整返回工具信息
                     seenToolIds.add(toolId);
-                    //根据工具名称获取工具实例
+                    // 根据工具名称获取工具实例
                     BaseTool tool = toolManager.getTool(toolName);
-                    //返回格式化的工具调用信息
+                    // 返回格式化的工具调用信息
                     return tool.generateToolRequestResponse();
                 } else {
                     // 不是第一次调用这个工具，直接返回空
@@ -105,7 +98,7 @@ public class JsonMessageStreamHandler {
             case TOOL_EXECUTED -> {
                 ToolExecutedMessage toolExecutedMessage = JSONUtil.toBean(chunk, ToolExecutedMessage.class);
                 JSONObject jsonObject = JSONUtil.parseObj(toolExecutedMessage.getArguments());
-                //根据工具名称获取工具实例
+                // 根据工具名称获取工具实例
                 String toolName = toolExecutedMessage.getName();
                 BaseTool tool = toolManager.getTool(toolName);
                 String result = tool.generateToolExecutedResult(jsonObject);

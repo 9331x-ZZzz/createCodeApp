@@ -37,11 +37,11 @@ public class PromptEnhancerNode {
                     for (ImageResource image : imageList) {
                         enhancedPromptBuilder.append("- ")
                                 .append(image.getCategory().getText())
-                                .append("：")
+                                .append(": ")
                                 .append(image.getDescription())
-                                .append("（")
+                                .append("(")
                                 .append(image.getUrl())
-                                .append("）\n");
+                                .append(")\n");
                     }
                 } else {
                     enhancedPromptBuilder.append(imageListStr);

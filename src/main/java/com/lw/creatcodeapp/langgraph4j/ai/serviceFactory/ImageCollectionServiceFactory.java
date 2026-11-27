@@ -1,5 +1,6 @@
-package com.lw.creatcodeapp.langgraph4j.ai;
+package com.lw.creatcodeapp.langgraph4j.ai.serviceFactory;
 
+import com.lw.creatcodeapp.langgraph4j.ai.ImageCollectionService;
 import com.lw.creatcodeapp.langgraph4j.tools.ImageSearchTool;
 import com.lw.creatcodeapp.langgraph4j.tools.LogoGeneratorTool;
 import com.lw.creatcodeapp.langgraph4j.tools.MermaidDiagramTool;

@@ -7,7 +7,7 @@
 4. generateLogos - 根据描述生成Logo设计图片，用于网站品牌标识
 
 请根据用户的需求分析，优先选择与用户需求最相关的图片类型：
-- 如果涉及技术、系统、架构等内容，调用 generateArchitectureDiagram 生成架构图
+- 如果涉及技术、系统、架构等内容，调用 generateMermaidDiagram 生成架构图
 - 如果需要品牌标识、Logo设计，调用 generateLogos 生成Logo
 - 如果需要内容相关图片，调用 searchContentImages 搜索图片
 - 如果需要装饰性插画，调用 searchIllustrations 搜索插画

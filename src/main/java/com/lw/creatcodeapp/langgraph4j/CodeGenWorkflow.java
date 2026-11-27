@@ -2,6 +2,7 @@ package com.lw.creatcodeapp.langgraph4j;
 
 import com.lw.creatcodeapp.exception.BusinessException;
 import com.lw.creatcodeapp.exception.ErrorCode;
+import com.lw.creatcodeapp.langgraph4j.model.QualityResult;
 import com.lw.creatcodeapp.langgraph4j.node.*;
 import com.lw.creatcodeapp.langgraph4j.state.WorkflowContext;
 import com.lw.creatcodeapp.model.enums.CodeGenTypeEnum;
@@ -37,17 +38,24 @@ public class CodeGenWorkflow {
                     .addNode("router", RouterNode.create())
                     .addNode("code_generator", CodeGeneratorNode.create())
                     .addNode("project_builder", ProjectBuilderNode.create())
+                    .addNode("code_quality_check",CodeQualityCheckNode.create())
 
                     // 添加边
                     .addEdge(START, "image_collector")
                     .addEdge("image_collector", "prompt_enhancer")
                     .addEdge("prompt_enhancer", "router")
                     .addEdge("router", "code_generator")
+                    .addEdge("code_generator", "code_quality_check")
                     //使用条件边，根据代码生成类型决定是否需要构造
-                    .addConditionalEdges("code_generator",
-                            edge_async(this::routeBuildOrSkip),
-                            Map.of("build","project_builder","skip_build", END))
-                    .addEdge("project_builder", END)
+                    // 新增质检条件边：根据质检结果决定下一步
+                    .addConditionalEdges("code_quality_check",
+                            edge_async(this::routeAfterQualityCheck),
+                            Map.of(
+                                    "build", "project_builder",   // 质检通过且需要构建
+                                    "skip_build", END,            // 质检通过但跳过构建
+                                    "fail", "code_generator"      // 质检失败，重新生成
+                            ))
+
 
                     // 编译工作流
                     .compile();
@@ -65,6 +73,19 @@ public class CodeGenWorkflow {
         }
         // VUE_PROJECT 需要构建
         return "build";
+    }
+
+    private String routeAfterQualityCheck(MessagesState<String> state) {
+        WorkflowContext context = WorkflowContext.getContext(state);
+        QualityResult qualityResult = context.getQualityResult();
+        // 如果质检失败，重新生成代码
+        if (qualityResult == null || !qualityResult.getIsValid()) {
+            log.error("代码质检失败，需要重新生成代码");
+            return "fail";
+        }
+        // 质检通过，使用原有的构建路由逻辑
+        log.info("代码质检通过，继续后续流程");
+        return routeBuildOrSkip(state);
     }
 
     /**
