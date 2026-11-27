@@ -22,8 +22,7 @@
 ## 输出格式
 
 请严格按照以下 JSON 格式返回检查结果：
-
-json
+```json
 {
   "isValid": true/false,
   "errors": [
@@ -35,7 +34,7 @@ json
     "改进建议2"
   ]
 }
-
+```
 
  ## 判断标准
 
